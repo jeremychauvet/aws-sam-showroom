@@ -1,4 +1,6 @@
 .PHONY: install-sam build test deploy destroy
+STACK_NAME=sam-get-free-tier-limits
+BUCKET_NAME=aws-sam-cli-managed-default-samclisourcebucket-900uctw6c80j
 
 install-sam:
 	brew tap aws/tap
@@ -11,8 +13,9 @@ build:
 test: build
 	sam local invoke
 
-deploy:
-	sam deploy --guided
+deploy: build
+	sam deploy --stack-name $(STACK_NAME) --s3-bucket $(BUCKET_NAME)
+	rm -fr .aws-sam/
 
 destroy:
-	aws cloudformation delete-stack --stack-name sam-get-free-tier-limits
+	aws cloudformation delete-stack --stack-name $(STACK_NAME)
