@@ -15,7 +15,7 @@ Resources:
       Handler: app.lambda_handler
       Runtime: python3.8
       Events:
-        HelloWorld:
+         GetFreeTierLimits:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /get-free-tier-limits
@@ -25,7 +25,7 @@ Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorlGetFreeTierLimitsdApi:
+  GetFreeTierLimitsdApi:
     Description: "API Gateway endpoint URL for Prod stage for lambda function used to get free tier limits"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get-free-tier-limits/"
   GetFreeTierLimitsFunction:
