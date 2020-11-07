@@ -20,14 +20,45 @@ Resources:
           Properties:
             Path: /free-tier-limits
             Method: get
+  GetFreeTierLimitsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: production
+      Cors: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Ref CognitoUserPoolName
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      UsernameAttributes:
+        - email
+      Schema:
+        - AttributeDataType: String
+          Name: email
+          Required: false
+  
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref CognitoUserPoolName
+      ClientName: !Ref UserPoolClientName
+      GenerateSecret: false
+
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  GetFreeTierLimitsdApi:
+  GetFreeTierLimitsApi:
     Description: "API Gateway endpoint URL for Prod stage for lambda function used to get free tier limits"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get-free-tier-limits/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/production/free-tier-limits/"
   GetFreeTierLimitsFunction:
     Description: "Lambda Function ARN"
     Value: !GetAtt GetFreeTierLimitsFunction.Arn
