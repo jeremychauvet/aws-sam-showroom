@@ -1,5 +1,5 @@
 .PHONY: install-sam build test deploy logs destroy start-api
-STACK_NAME=sam-get-free-tier-limits
+STACK_NAME=cost-forecast
 BUCKET_NAME=aws-sam-cli-managed-default-samclisourcebucket-900uctw6c80j
 
 install-sam:
@@ -23,4 +23,4 @@ start-api:
 	sam local start-api
 
 logs:
-	sam logs -n CostForecastFunction --stack-name cost-forecast --tail
+	sam logs -n CostForecastFunction --stack-name $(STACK_NAME) --tail
