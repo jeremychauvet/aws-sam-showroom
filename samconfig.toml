@@ -2,9 +2,9 @@ version = 0.1
 [dev]
 [dev.deploy]
 [dev.deploy.parameters]
-stack_name = "get-free-tier-limits"
+stack_name = "free-tier-limit"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-900uctw6c80j"
-s3_prefix = "get-free-tier-limits"
+s3_prefix = "free-tier-limit"
 region = "eu-central-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
