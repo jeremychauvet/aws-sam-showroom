@@ -14,7 +14,7 @@ test: build
 	sam local invoke
 
 deploy: build
-	sam deploy
+	sam deploy --guided
 
 destroy:
 	aws cloudformation delete-stack --stack-name $(STACK_NAME)
