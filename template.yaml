@@ -19,32 +19,32 @@ Globals:
     Timeout: 2
 
 Resources:
-  # ApiGateway:
-  #   Type: AWS::Serverless::Api
-  #   Properties:
-  #     StageName: Prod
-  #     Cors: "'*'"
-  #     Auth:
-  #       DefaultAuthorizer: MyCognitoAuthorizer
-  #       Authorizers:
-  #         MyCognitoAuthorizer:
-  #           UserPoolArn: !GetAtt MyCognitoUserPool.Arn
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: production
+      Cors: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt UserPool.Arn
 
-  # MyFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     CodeUri: cost-forecast/
-  #     Handler: app.handler
-  #     Runtime: python3.8
-  #     Events:
-  #       ApiEvent:
-  #         Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-  #         Properties:
-  #             Path: /cost-forecast
-  #             Method: get
-  #             RestApiId: !Ref ApiGateway
-  #             Auth:
-  #               Authorizer: MyCognitoAuth # OPTIONAL
+  CostForecastFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cost-forecast/
+      Handler: app.handler
+      Runtime: python3.8
+      Events:
+        ApiEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+              Path: /cost-forecast
+              Method: get
+              RestApiId: !Ref ApiGateway
+              # Auth:
+              #   Authorizer: MyCognitoAuth # OPTIONAL
 
   UserPool:
     Type: AWS::Cognito::UserPool
