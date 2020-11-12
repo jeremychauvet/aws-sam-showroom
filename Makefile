@@ -8,7 +8,7 @@ install-sam:
 	sam --version
 
 build:
-	sam build
+	sam build --use-container
 
 test: build
 	sam local invoke
