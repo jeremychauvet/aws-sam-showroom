@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Method to get free tier limits.
+Description: Method to get cost forecast.
 
 Parameters:
   AppName:
@@ -16,7 +16,7 @@ Parameters:
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 1
+    Timeout: 2
 
 Resources:
   # ApiGateway:
@@ -33,14 +33,14 @@ Resources:
   # MyFunction:
   #   Type: AWS::Serverless::Function
   #   Properties:
-  #     CodeUri: get-free-tier-limits/
+  #     CodeUri: cost-forecast/
   #     Handler: app.handler
   #     Runtime: python3.8
   #     Events:
   #       ApiEvent:
   #         Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
   #         Properties:
-  #             Path: /hello
+  #             Path: /cost-forecast
   #             Method: get
   #             RestApiId: !Ref ApiGateway
   #             Auth:
