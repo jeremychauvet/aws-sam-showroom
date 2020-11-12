@@ -14,7 +14,7 @@ test: build
 	sam local invoke
 
 deploy: build
-	sam deploy --stack-name $(STACK_NAME) --region eu-central-1 --s3-bucket $(BUCKET_NAME) --capabilities "CAPABILITY_IAM"
+	sam deploy
 
 destroy:
 	aws cloudformation delete-stack --stack-name $(STACK_NAME)
