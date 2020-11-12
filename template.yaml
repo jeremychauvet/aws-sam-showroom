@@ -2,41 +2,59 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Method to get free tier limits.
 
+Parameters:
+  AppName:
+    Type: String
+    Description: Application name
+  ClientDomains:
+    Type: CommaDelimitedList
+    Description: List of domains allowed to use this UserPool
+  UserEmail:
+    Type: String
+    Description: Email of the first UserPool user.
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 1
 
 Resources:
-  GetFreeTierLimitsFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: get-free-tier-limits/
-      Handler: app.handler
-      Runtime: python3.8
-      Events:
-         GetFreeTierLimits:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /free-tier-limits
-            Method: get
-  GetFreeTierLimitsApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: production
-      Cors: "'*'"
-      Auth:
-        DefaultAuthorizer: CognitoAuthorizer
-        Authorizers:
-          CognitoAuthorizer:
-            UserPoolArn: !GetAtt CognitoUserPool.Arn
-  CognitoUserPool:
+  # ApiGateway:
+  #   Type: AWS::Serverless::Api
+  #   Properties:
+  #     StageName: Prod
+  #     Cors: "'*'"
+  #     Auth:
+  #       DefaultAuthorizer: MyCognitoAuthorizer
+  #       Authorizers:
+  #         MyCognitoAuthorizer:
+  #           UserPoolArn: !GetAtt MyCognitoUserPool.Arn
+
+  # MyFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     CodeUri: get-free-tier-limits/
+  #     Handler: app.handler
+  #     Runtime: python3.8
+  #     Events:
+  #       ApiEvent:
+  #         Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+  #         Properties:
+  #             Path: /hello
+  #             Method: get
+  #             RestApiId: !Ref ApiGateway
+  #             Auth:
+  #               Authorizer: MyCognitoAuth # OPTIONAL
+
+  UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Ref CognitoUserPoolName
+      UserPoolName: !Sub ${AppName}-UserPool
       Policies:
         PasswordPolicy:
           MinimumLength: 8
+      AutoVerifiedAttributes:
+        - email
       UsernameAttributes:
         - email
       Schema:
@@ -44,24 +62,69 @@ Resources:
           Name: email
           Required: false
   
-  CognitoUserPoolClient:
+  UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      UserPoolId: !Ref CognitoUserPoolName
-      ClientName: !Ref UserPoolClientName
-      GenerateSecret: false
+      UserPoolId: !Ref UserPool
+      ClientName: FreeTierLimitUserPoolClientName
+      GenerateSecret: false # recommanded for web clients.
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURLs: !Ref ClientDomains
+      LogoutURLs: !Ref ClientDomains
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+        - implicit # Postman testing.
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
 
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub ${AppName}-${AWS::AccountId}
+      UserPoolId: !Ref UserPool
+
+  UserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Users
+      Description: Common users group
+      Precedence: 0
+      UserPoolId: !Ref UserPool
+
+  FirstUser:
+    Type: AWS::Cognito::UserPoolUser
+    Properties:
+      Username: !Ref UserEmail
+      DesiredDeliveryMediums:
+        - EMAIL 
+      ForceAliasCreation: true
+      UserAttributes:
+        - Name: email
+          Value: !Ref UserEmail
+      UserPoolId: !Ref UserPool
+
+  AddFirstUserToUserGroup:
+    Type: AWS::Cognito::UserPoolUserToGroupAttachment
+    Properties:
+      GroupName: !Ref UserGroup
+      Username: !Ref FirstUser
+      UserPoolId: !Ref UserPool
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  GetFreeTierLimitsApi:
-    Description: "API Gateway endpoint URL for Prod stage for lambda function used to get free tier limits"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/production/free-tier-limits/"
-  GetFreeTierLimitsFunction:
-    Description: "Lambda Function ARN"
-    Value: !GetAtt GetFreeTierLimitsFunction.Arn
-  GetFreeTierLimitsIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt GetFreeTierLimitsIamRole.Arn
+  UserPoolId:
+    Description: "User pool ID"
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub ${AppName}:UserPoolId
+
+  UserPoolClientId:
+    Description: "Application client ID"
+    Value: !Ref UserPoolClient
+
+  AuthUrl:
+    Description: "URL used for authentication"
+    Value: !Sub https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
