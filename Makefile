@@ -1,4 +1,4 @@
-.PHONY: install-sam build test deploy destroy
+.PHONY: install-sam build test deploy destroy start-api
 STACK_NAME=sam-get-free-tier-limits
 BUCKET_NAME=aws-sam-cli-managed-default-samclisourcebucket-900uctw6c80j
 
@@ -18,3 +18,6 @@ deploy: build
 
 destroy:
 	aws cloudformation delete-stack --stack-name $(STACK_NAME)
+
+start-api:
+	sam local start-api
