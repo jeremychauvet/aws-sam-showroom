@@ -17,12 +17,14 @@ Parameters:
 Globals:
   Function:
     Timeout: 2
+    MemorySize: 128
+    Runtime: python3.8
 
 Resources:
   ApiGateway:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: production
+      StageName: live
       Cors: "'*'"
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
@@ -35,7 +37,8 @@ Resources:
     Properties:
       CodeUri: cost-forecast/
       Handler: app.handler
-      Runtime: python3.8
+      AutoPublishAlias: live
+      DeploymentPreference: Linear10PercentEvery10Minutes
       Events:
         ApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -66,7 +69,7 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       UserPoolId: !Ref UserPool
-      ClientName: FreeTierLimitUserPoolClientName
+      ClientName: CostForecastUserPoolClientName
       GenerateSecret: false # recommanded for web clients.
       SupportedIdentityProviders:
         - COGNITO
