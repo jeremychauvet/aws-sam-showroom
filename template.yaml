@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Method to get cost forecast.
+Description: Function to get cost forecast.
 
 Parameters:
   AppName:
@@ -13,12 +13,12 @@ Parameters:
     Type: String
     Description: Email of the first UserPool user.
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 2
     MemorySize: 128
     Runtime: python3.8
+    Tags: {'CreatedBy': 'AWS SAM', 'Environment': 'dev'}
 
 Resources:
   ApiGateway:
@@ -37,10 +37,11 @@ Resources:
     Properties:
       CodeUri: cost-forecast/
       Handler: app.handler
+      Description: Function to get cost forecast.
       AutoPublishAlias: live
       Events:
         ApiEvent:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
               Path: /cost-forecast
               Method: get
