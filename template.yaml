@@ -38,7 +38,6 @@ Resources:
       CodeUri: cost-forecast/
       Handler: app.handler
       AutoPublishAlias: live
-      DeploymentPreference: Linear10PercentEvery10Minutes
       Events:
         ApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
