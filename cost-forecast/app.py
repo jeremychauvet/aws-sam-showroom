@@ -1,41 +1,34 @@
 import json
-import requests
-
+import boto3
+import datetime
 
 def handler(event, context):
-    """Sample pure Lambda function
-
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
-
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
     try:
-        ip = requests.get("http://checkip.amazonaws.com/")
-    except requests.RequestException as e:
+        client = boto3.client('ce', region_name='eu-central-1')
+        response = client.get_usage_forecast(
+            TimePeriod={
+                'Start': str(datetime.date.today()),
+                'End': '2020-11-30'
+            },
+            Metric='USAGE_QUANTITY',
+            Granularity='MONTHLY',
+            Filter={
+                'Dimensions': {
+                    'Key': 'USAGE_TYPE',
+                    'Values': [
+                        'hours',
+                    ]
+                }
+            },
+        )
+    except client.exceptions.DataUnavailableException as e:
         # Send some context about this error to Lambda Logs
         print(e)
-
         raise e
 
     return {
         "statusCode": 200,
         "body": json.dumps({
-            "message": "hello world",
-            "location": ip.text.replace("\n", "")
+            "response": response.text.replace("\n", "")
         }),
     }
